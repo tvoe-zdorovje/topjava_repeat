@@ -14,12 +14,36 @@
         .excess {
             color: red;
         }
+
+        ul {
+            list-style: none;
+            display: inline-flex;
+            padding: 10px;
+        }
+        li {
+            padding: 5px 20px;
+        }
     </style>
 </head>
 <body>
 <section>
     <h3><a href="index.html">Home</a></h3>
     <hr/>
+    <form method="get">
+        <ul>
+            <li><label for="startDate">с даты (включая)</label><br>
+                <input type="date" name="startDate" id="startDate" class="filter" value="${param.getOrDefault('startDate', "")}"></li>
+            <li><label for="endDate">до даты (включая)</label><br>
+                <input type="date" name="endDate" id="endDate" class="filter" value="${param.getOrDefault('endDate', "")}"></li>
+            <li><label for="startTime">с времени (включая)</label><br>
+                <input type="time" name="startTime" id="startTime" class="filter" value="${param.getOrDefault('startTime', "")}"></li>
+            <li><label for="endTime">до времени</label><br>
+                <input type="time" name="endTime" id="endTime" class="filter" value="${param.getOrDefault('endTime', "")}"></li>
+        </ul>
+        <br>
+        <button type="submit" name="action" value="filter">Найти</button>
+    </form>
+        <a href="meals"><button>Отмена</button></a>
     <h2>Meals</h2>
     <a href="meals?action=create">Add Meal</a>
     <br><br>

@@ -5,9 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
+import ru.javawebinar.topjava.util.DateTimeUtil;
 import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.util.UsersUtil;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -60,9 +62,18 @@ public class InMemoryMealRepository implements MealRepository {
     @Override
     public List<Meal> getAll(int userId) {
         log.info("[user:{}] get all", userId);
+        return getAllBetweenInclusive(userId, LocalDate.MIN, LocalDate.MAX);
+    }
+
+    @Override
+    public List<Meal> getAllBetweenInclusive(int userId, LocalDate startDate, LocalDate endDate) {
+        log.info("[user:{}] get all from {} to {} (inclusive)", userId, startDate, endDate);
 
         Map<Integer, Meal> meals = repository.get(userId);
-        return meals == null ? new ArrayList<>() : meals.values().stream().sorted(Comparator.comparing(Meal::getDateTime, Comparator.reverseOrder())).collect(Collectors.toList());
+        return meals == null ? new ArrayList<>() : meals.values().stream()
+                .filter(meal -> DateTimeUtil.isBetweenHalfOpen(meal.getDate(), startDate, endDate))
+                .sorted(Comparator.comparing(Meal::getDateTime, Comparator.reverseOrder()))
+                .collect(Collectors.toList());
     }
 }
 
