@@ -4,17 +4,28 @@
                  xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm
                                      http://xmlns.jcp.org/xml/ns/persistence/orm_2_0.xsd" version="2.1">
 
-    <!-- JPA Named Queries -->
-    <named-query name="Meal.delete">
-        <query>DELETE FROM Meal m WHERE m.id=:id AND m.user.id=:userId</query>
-    </named-query>
+    <entity class="ru.javawebinar.topjava.model.Meal" cacheable="false">
+        <!-- JPA Named Queries -->
+        <named-query name="Meal.delete">
+            <query>DELETE FROM Meal m WHERE m.id=:id AND m.user.id=:userId</query>
+        </named-query>
 
-    <named-query name="Meal.getAll">
-        <query>SELECT m FROM Meal m WHERE m.user.id=:userId ORDER BY m.dateTime DESC</query>
-    </named-query>
+        <named-query name="Meal.getAll">
+            <query>SELECT m FROM Meal m WHERE m.user.id=:userId ORDER BY m.dateTime DESC</query>
+        </named-query>
 
-    <named-query name="Meal.getBetween">
-        <query>SELECT m FROM Meal m WHERE m.user.id=:userId AND m.dateTime >=:startDateTime AND m.dateTime&lt;:endDateTime ORDER BY m.dateTime DESC</query>
-    </named-query>
-    <!-- entity mapping -->
+        <named-query name="Meal.getBetween">
+            <query>SELECT m FROM Meal m WHERE m.user.id=:userId AND m.dateTime >=:startDateTime AND m.dateTime&lt;:endDateTime
+                ORDER BY m.dateTime DESC
+            </query>
+        </named-query>
+
+        <named-query name="Meal.get">
+            <query>SELECT m FROM Meal m WHERE m.id=:id AND m.user.id=:userId</query>
+        </named-query>
+
+        <named-entity-graph name="Meal.entityGraph">
+            <named-attribute-node name="user"/>
+        </named-entity-graph>
+    </entity>
 </entity-mappings>

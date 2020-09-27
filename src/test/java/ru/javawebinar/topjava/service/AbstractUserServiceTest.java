@@ -1,15 +1,13 @@
 package ru.javawebinar.topjava.service;
 
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.Stopwatch;
 import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
+import org.springframework.core.env.Environment;
 import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -17,6 +15,8 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.SpringRunner;
 import ru.javawebinar.topjava.ActiveDbProfileResolver;
+import ru.javawebinar.topjava.MealTestData;
+import ru.javawebinar.topjava.UserTestData;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
@@ -127,5 +127,19 @@ public abstract class AbstractUserServiceTest {
     public void getAll() throws Exception {
         List<User> all = service.getAll();
         USER_MATCHER.assertMatch(all, ADMIN, USER);
+    }
+
+    @Autowired
+    private Environment environment;
+    @Test
+    public void getWithUser() {
+        if (environment.acceptsProfiles("datajpa")) {
+            User actual = service.getWithMeals(USER_ID);
+            User expected = new User(USER);
+            expected.setMeals(MealTestData.MEALS);
+            UserTestData.assertMatchWithMeal(actual, expected);
+        } else {
+            Assert.assertThrows(UnsupportedOperationException.class, () -> service.getWithMeals(USER_ID));
+        }
     }
 }

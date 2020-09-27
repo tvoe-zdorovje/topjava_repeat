@@ -9,6 +9,7 @@ import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
@@ -24,9 +25,11 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertThrows;
 import static org.slf4j.LoggerFactory.getLogger;
+import static ru.javawebinar.topjava.MealTestData.NOT_FOUND;
+import static ru.javawebinar.topjava.MealTestData.getNew;
+import static ru.javawebinar.topjava.MealTestData.getUpdated;
 import static ru.javawebinar.topjava.MealTestData.*;
-import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
-import static ru.javawebinar.topjava.UserTestData.USER_ID;
+import static ru.javawebinar.topjava.UserTestData.*;
 
 @ContextConfiguration({
         "classpath:spring/spring-app.xml",
@@ -60,7 +63,6 @@ public abstract class AbstractMealServiceTest {
                 "\n---------------------------------");
         results.delete(0, results.length());
     }
-
 
     @Autowired
     private MealService service;
@@ -136,5 +138,21 @@ public abstract class AbstractMealServiceTest {
     @Test
     public void getBetweenWithNullDates() throws Exception {
         MEAL_MATCHER.assertMatch(service.getBetweenInclusive(null, null, USER_ID), MEALS);
+    }
+
+
+    @Autowired
+    private Environment environment;
+    @Test
+    public void getWithUser() {
+        if (environment.acceptsProfiles("datajpa")) {
+            Meal actual = service.getWithUser(MEAL1_ID, USER_ID);
+            Meal expected = new Meal(MEAL1.id(), MEAL1.getDateTime(), MEAL1.getDescription(), MEAL1.getCalories());
+            expected.setUser(USER);
+            MEAL_MATCHER.assertMatch(actual, expected);
+            USER_MATCHER.assertMatch(actual.getUser(), expected.getUser());
+        } else {
+            Assert.assertThrows(UnsupportedOperationException.class, () -> service.getWithUser(MEAL1_ID, USER_ID));
+        }
     }
 }

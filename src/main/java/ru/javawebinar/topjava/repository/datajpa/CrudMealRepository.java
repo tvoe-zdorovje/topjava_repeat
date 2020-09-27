@@ -1,5 +1,6 @@
 package ru.javawebinar.topjava.repository.datajpa;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -18,7 +19,7 @@ public interface CrudMealRepository extends JpaRepository<Meal, Integer> {
     @Query("UPDATE Meal m SET m.dateTime=?2, m.description=?3, m.calories=?4 WHERE m.id=?1 AND m.user.id=?5")
     int update(int id, LocalDateTime localDateTime, String description, int calories, int userId);
 
-    @Query("SELECT m FROM Meal m WHERE m.id=:id AND m.user.id=:userId")
+    @Query(name=Meal.GET)
     Meal get(@Param("id") int id, @Param("userId")int userId);
 
     @Transactional
@@ -31,4 +32,8 @@ public interface CrudMealRepository extends JpaRepository<Meal, Integer> {
 
     @Query(name = Meal.ALL_SORTED)
     List<Meal> getAll(@Param("userId") int userId);
+
+    @EntityGraph(value = Meal.GRAPH, type = EntityGraph.EntityGraphType.FETCH)
+    @Query(name=Meal.GET)
+    Meal getWithUser(@Param("id") int id, @Param("userId") int userId);
 }
