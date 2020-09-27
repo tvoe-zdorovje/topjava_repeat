@@ -35,7 +35,7 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 @RunWith(SpringRunner.class)
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 @ActiveProfiles(resolver = ActiveDbProfileResolver.class)
-public class MealServiceTest {
+public abstract class AbstractMealServiceTest {
     private static final Logger log = getLogger("result");
 
     private static final StringBuilder results = new StringBuilder();
@@ -51,9 +51,6 @@ public class MealServiceTest {
         }
     };
 
-    @Autowired
-    private MealService service;
-
     @AfterClass
     public static void printResult() {
         log.info("\n---------------------------------" +
@@ -61,7 +58,12 @@ public class MealServiceTest {
                 "\n---------------------------------" +
                 results +
                 "\n---------------------------------");
+        results.delete(0, results.length());
     }
+
+
+    @Autowired
+    private MealService service;
 
     @Test
     public void delete() throws Exception {
