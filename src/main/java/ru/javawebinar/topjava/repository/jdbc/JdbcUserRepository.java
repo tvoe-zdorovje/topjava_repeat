@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -39,7 +40,6 @@ public class JdbcUserRepository implements UserRepository {
     @Transactional
     public User save(User user) {
         BeanPropertySqlParameterSource parameterSource = new BeanPropertySqlParameterSource(user);
-
         if (user.isNew()) {
             Number newKey = insertUser.executeAndReturnKey(parameterSource);
             user.setId(newKey.intValue());
@@ -48,6 +48,11 @@ public class JdbcUserRepository implements UserRepository {
                         "registered=:registered, enabled=:enabled, calories_per_day=:caloriesPerDay WHERE id=:id", parameterSource) == 0) {
             return null;
         }
+        List<Object[]> batchArgs = new ArrayList<>();
+        user.getRoles().forEach(role -> batchArgs.add(new Object[]{user.id(), role.toString()}));
+
+        jdbcTemplate.update("DELETE FROM user_roles WHERE user_id=?", user.id());
+        jdbcTemplate.batchUpdate("INSERT INTO user_roles(user_id, role) VALUES (?, ?)", batchArgs);
         return user;
     }
 
@@ -59,19 +64,19 @@ public class JdbcUserRepository implements UserRepository {
 
     @Override
     public User get(int id) {
-        List<User> users = jdbcTemplate.query("SELECT * FROM users WHERE id=?", ROW_MAPPER, id);
+        List<User> users = jdbcTemplate.query("SELECT u.*, (SELECT STRING_AGG(ur.role, ', ') as roles FROM user_roles ur WHERE u.id = ur.user_id) FROM users u WHERE id=?", ROW_MAPPER, id);
         return DataAccessUtils.singleResult(users);
     }
 
     @Override
     public User getByEmail(String email) {
 //        return jdbcTemplate.queryForObject("SELECT * FROM users WHERE email=?", ROW_MAPPER, email);
-        List<User> users = jdbcTemplate.query("SELECT * FROM users WHERE email=?", ROW_MAPPER, email);
+        List<User> users = jdbcTemplate.query("SELECT u.*, (SELECT STRING_AGG(ur.role, ', ') as roles FROM user_roles ur WHERE u.id = ur.user_id) FROM users u WHERE email=?", ROW_MAPPER, email);
         return DataAccessUtils.singleResult(users);
     }
 
     @Override
     public List<User> getAll() {
-        return jdbcTemplate.query("SELECT * FROM users ORDER BY name, email", ROW_MAPPER);
+        return jdbcTemplate.query("SELECT u.*, STRING_AGG(ur.role, ', ') AS roles FROM users u LEFT JOIN user_roles ur on u.id = ur.user_id GROUP BY u.id, u.name, u.email ORDER BY name, email", ROW_MAPPER);
     }
 }
