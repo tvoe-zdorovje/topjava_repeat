@@ -12,6 +12,9 @@ import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validation;
 import java.util.*;
 
 @Repository
@@ -39,6 +42,11 @@ public class JdbcUserRepository implements UserRepository {
     @Override
     @Transactional
     public User save(User user) {
+        Set<ConstraintViolation<User>> violations = Validation.buildDefaultValidatorFactory().getValidator().validate(user);
+        if (violations.size() > 0) {
+            throw new ConstraintViolationException(violations);
+        }
+
         BeanPropertySqlParameterSource parameterSource = new BeanPropertySqlParameterSource(user);
         if (user.isNew()) {
             Number newKey = insertUser.executeAndReturnKey(parameterSource);
@@ -90,11 +98,11 @@ public class JdbcUserRepository implements UserRepository {
         Map<Integer, Set<Role>> userRoles = new HashMap<>();
         maps.forEach(map -> {
             userRoles.merge((Integer) map.get("USER_ID"),
-                    EnumSet.of(Role.valueOf((String)map.get("ROLE"))),
+                    EnumSet.of(Role.valueOf((String) map.get("ROLE"))),
                     (roles, roles2) -> {
-                roles.addAll(roles2);
-                return roles;
-            });
+                        roles.addAll(roles2);
+                        return roles;
+                    });
         });
 
         users.forEach(user -> user.setRoles(userRoles.get(user.id())));
