@@ -8,11 +8,11 @@ import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Repository
 @Transactional(readOnly = true)
@@ -64,19 +64,41 @@ public class JdbcUserRepository implements UserRepository {
 
     @Override
     public User get(int id) {
-        List<User> users = jdbcTemplate.query("SELECT u.*, (SELECT STRING_AGG(ur.role, ', ') as roles FROM user_roles ur WHERE u.id = ur.user_id) FROM users u WHERE id=?", ROW_MAPPER, id);
-        return DataAccessUtils.singleResult(users);
+        List<User> users = jdbcTemplate.query("SELECT * FROM users WHERE id=?", ROW_MAPPER, id);
+        return setRolesAndGet(DataAccessUtils.singleResult(users));
     }
 
     @Override
     public User getByEmail(String email) {
-//        return jdbcTemplate.queryForObject("SELECT * FROM users WHERE email=?", ROW_MAPPER, email);
-        List<User> users = jdbcTemplate.query("SELECT u.*, (SELECT STRING_AGG(ur.role, ', ') as roles FROM user_roles ur WHERE u.id = ur.user_id) FROM users u WHERE email=?", ROW_MAPPER, email);
-        return DataAccessUtils.singleResult(users);
+        List<User> users = jdbcTemplate.query("SELECT * FROM users WHERE email=?", ROW_MAPPER, email);
+        return setRolesAndGet(DataAccessUtils.singleResult(users));
+    }
+
+    private User setRolesAndGet(User user) {
+        if (user == null) return null;
+
+        List<Role> list = jdbcTemplate.queryForList("SELECT r.role FROM user_roles r WHERE r.user_id=?", new Integer[]{user.getId()}, Role.class);
+        user.setRoles(list);
+        return user;
     }
 
     @Override
     public List<User> getAll() {
-        return jdbcTemplate.query("SELECT u.*, STRING_AGG(ur.role, ', ') AS roles FROM users u LEFT JOIN user_roles ur on u.id = ur.user_id GROUP BY u.id, u.name, u.email ORDER BY name, email", ROW_MAPPER);
+        List<User> users = jdbcTemplate.query("SELECT * FROM users ORDER BY name, email", ROW_MAPPER);
+        List<Map<String, Object>> maps = jdbcTemplate.queryForList("SELECT * FROM user_roles");
+
+        Map<Integer, Set<Role>> userRoles = new HashMap<>();
+        maps.forEach(map -> {
+            userRoles.merge((Integer) map.get("USER_ID"),
+                    EnumSet.of(Role.valueOf((String)map.get("ROLE"))),
+                    (roles, roles2) -> {
+                roles.addAll(roles2);
+                return roles;
+            });
+        });
+
+        users.forEach(user -> user.setRoles(userRoles.get(user.id())));
+
+        return users;
     }
 }
