@@ -1,6 +1,5 @@
 package ru.javawebinar.topjava.web.meal;
 
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +10,6 @@ import ru.javawebinar.topjava.to.MealTo;
 
 import java.net.URI;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -49,14 +47,13 @@ public class MealRestController extends AbstractMealController {
     public List<MealTo> getAll() {
         return super.getAll();
     }
-//refactor filtering by LocalDate and LocalTime PLEASE!!!
-    @GetMapping(params = {"from", "to"})
-    public List<MealTo> getBetween(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @RequestParam LocalDateTime from,
-                                   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @RequestParam LocalDateTime to){
-        LocalDate startDate = from == null ? null : from.toLocalDate();
-        LocalDate endDate = from == null ? null : to.toLocalDate();
-        LocalTime startTime = from == null ? null : from.toLocalTime();
-        LocalTime endTime = from == null || to.toLocalTime().compareTo(LocalTime.MIN)==0 ? null : to.toLocalTime();
+//thanks!
+//    @GetMapping(params = {"startDate", "startTime", "endDate", "endTime"})
+    @GetMapping("/filter")
+    public List<MealTo> getBetween(/*@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)*/ @RequestParam LocalDate startDate,
+                                   /*@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)*/ @RequestParam LocalDate endDate,
+                                   /*@DateTimeFormat(iso = DateTimeFormat.ISO.TIME)*/ @RequestParam LocalTime startTime,
+                                   /*@DateTimeFormat(iso = DateTimeFormat.ISO.TIME)*/ @RequestParam LocalTime endTime){
         return super.getBetween(startDate, startTime, endDate, endTime);
     }
 
