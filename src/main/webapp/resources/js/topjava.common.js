@@ -3,9 +3,9 @@ var context, form;
 function makeEditable(ctx) {
     context = ctx;
     form = $('#detailsForm');
-    $(".delete").click(function () {
+    $(document).on('click', 'button.delete', function () {
         if (confirm('Are you sure?')) {
-            deleteRow($(this).attr("id"));
+            deleteRow($(this).closest('tr').attr('id'));
         }
     });
 
@@ -15,6 +15,8 @@ function makeEditable(ctx) {
 
     // solve problem with cache in IE: https://stackoverflow.com/a/4303862/548473
     $.ajaxSetup({cache: false});
+
+    updateTable();
 }
 
 function add() {
@@ -33,8 +35,8 @@ function deleteRow(id) {
 }
 
 function updateTable() {
-    $.get(context.ajaxUrl, function (data) {
-        context.datatableApi.clear().rows.add(data).draw();
+    context.getData().done(function (data) {
+        context.datatableApi.clear().rows.add(data).draw()
     });
 }
 
