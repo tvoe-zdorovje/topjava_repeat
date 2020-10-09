@@ -37,4 +37,9 @@ public class AdminUIController extends AbstractUserController {
             super.create(user);
         }
     }
+
+    @PatchMapping(value = "/{id}", params = "status")
+    public void updateStatus(@PathVariable int id, @RequestParam boolean status) {
+        super.updateStatus(id, status);
+    }
 }

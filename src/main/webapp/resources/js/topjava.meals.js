@@ -34,11 +34,10 @@ $(function () {
                     }
                 }
             ],
-            "rowId": function (data) {
-                return data.id;
-            },
             "createdRow": function (row, data, index) {
-                $(row).attr("data-mealExcess", data.excess)
+                row = $(row);
+                row.attr("id", data.id);
+                row.attr("data-mealExcess", data.excess);
             },
             "order": [
                 [
@@ -54,15 +53,15 @@ $(function () {
             });
         }
     });
-})
+});
 
 function filter() {
     needToFilter = true;
     updateTable()
-}
+};
 
 function resetFilter() {
     $("form.filter").find(":input[type=date], :input[type=time]").val("");
     needToFilter = false;
     updateTable();
-}
+};

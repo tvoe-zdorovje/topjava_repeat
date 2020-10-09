@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 
 <html>
 <jsp:include page="fragments/headTag.jsp"/>
@@ -29,22 +30,9 @@
                 <th></th>
             </tr>
             </thead>
-            <c:forEach items="${users}" var="user">
-                <jsp:useBean id="user" type="ru.javawebinar.topjava.model.User"/>
-                <tr>
-                    <td><c:out value="${user.name}"/></td>
-                    <td><a href="mailto:${user.email}">${user.email}</a></td>
-                    <td>${user.roles}</td>
-                    <td><input type="checkbox" <c:if test="${user.enabled}">checked</c:if> id="${user.id}"/></td>
-                    <td><fmt:formatDate value="${user.registered}" pattern="dd-MMMM-yyyy"/></td>
-                    <td><a><span class="fa fa-pencil"></span></a></td>
-                    <td><a class="delete" id="${user.id}"><span class="fa fa-remove"></span></a></td>
-                </tr>
-            </c:forEach>
         </table>
     </div>
 </div>
-
 <div class="modal fade" tabindex="-1" id="editRow">
     <div class="modal-dialog">
         <div class="modal-content">
