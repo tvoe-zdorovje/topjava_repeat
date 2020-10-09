@@ -52,4 +52,8 @@ public abstract class AbstractUserController {
     public void updateStatus(int id, boolean status) {
         service.updateStatus(id, status);
     }
+
+    public User getWithMeals(int id) {
+        return service.getWithMeals(id);
+    }
 }
