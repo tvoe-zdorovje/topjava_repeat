@@ -1,3 +1,5 @@
+var mealAjaxUrl = "profile/meals/";
+
 function updateFilteredTable() {
     $.ajax({
         type: "GET",
@@ -13,13 +15,20 @@ function clearFilter() {
 
 $(function () {
     makeEditable({
-        ajaxUrl: "profile/meals/",
+        ajaxUrl: mealAjaxUrl,
         datatableApi: $("#datatable").DataTable({
+            "ajax": {
+                "url": mealAjaxUrl,
+                "dataSrc": ""
+            },
             "paging": false,
             "info": true,
             "columns": [
                 {
-                    "data": "dateTime"
+                    "data": "dateTime",
+                    "render": function (date) {
+                         return date.replace("T", " ").substring(0, 16);
+                    }
                 },
                 {
                     "data": "description"
@@ -29,13 +38,18 @@ $(function () {
                 },
                 {
                     "defaultContent": "Edit",
-                    "orderable": false
+                    "orderable": false,
+                    "render": renderEditBtn
                 },
                 {
                     "defaultContent": "Delete",
-                    "orderable": false
+                    "orderable": false,
+                    "render": renderDeleteBtn
                 }
             ],
+            "createdRow": function (row, data) {
+                $(row).attr("data-mealExcess", data.excess);
+            },
             "order": [
                 [
                     0,
