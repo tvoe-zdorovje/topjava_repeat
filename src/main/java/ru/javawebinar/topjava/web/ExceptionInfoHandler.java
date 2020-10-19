@@ -40,7 +40,15 @@ public class ExceptionInfoHandler {
     @ResponseStatus(value = HttpStatus.CONFLICT)  // 409
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ErrorInfo conflict(HttpServletRequest req, DataIntegrityViolationException e) {
-        return logAndGetErrorInfo(req, e, true, DATA_ERROR);
+        Throwable rootCause = ValidationUtil.getRootCause(e);
+        String message = rootCause.getLocalizedMessage().toUpperCase();
+        if (message.contains("EMAIL")) {
+            return logAndGetErrorInfo(req, e, "User with this email already exists!", false, DATA_ERROR);
+        } else if (message.contains(("DATETIME"))){
+            return logAndGetErrorInfo(req, e, "Meal with this date and time already exists!", false, DATA_ERROR);
+        } else {
+            return logAndGetErrorInfo(req, e, true, DATA_ERROR);
+        }
     }
 
     @ResponseStatus(value = HttpStatus.UNPROCESSABLE_ENTITY)  // 422

@@ -93,7 +93,7 @@ class AdminRestControllerTest extends AbstractControllerTest {
         perform(MockMvcRequestBuilders.put(REST_URL + USER_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(ADMIN))
-                .content(JsonUtil.writeValue(updated)))
+                .content(UserTestData.jsonWithPassword(updated, updated.getPassword())))
                 .andExpect(status().isNoContent());
 
         USER_MATCHER.assertMatch(userService.get(USER_ID), updated);
@@ -108,6 +108,20 @@ class AdminRestControllerTest extends AbstractControllerTest {
                 .with(userHttpBasic(ADMIN))
                 .content(JsonUtil.writeValue(updated)))
                 .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    void updateWithDuplicateEmail() throws Exception {
+        User updated = getUpdated();
+        updated.setEmail("admin@gmail.com");
+        perform(MockMvcRequestBuilders.put(REST_URL + USER_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(userHttpBasic(ADMIN))
+                .content(UserTestData.jsonWithPassword(updated, updated.getPassword())))
+                .andExpect(status().isConflict())
+                .andExpect(content().string("{\"url\":\"http://localhost/rest/admin/users/100000\",\"type\":\"DATA_ERROR\",\"detail\":\"User with this email already exists!\"}"));
+
+        USER_MATCHER.assertMatch(userService.get(USER_ID), USER);
     }
 
     @Test
@@ -135,6 +149,20 @@ class AdminRestControllerTest extends AbstractControllerTest {
                 .with(userHttpBasic(ADMIN))
                 .content(UserTestData.jsonWithPassword(newUser, "newPass")))
                 .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    void createWithDuplicateEmail() throws Exception {
+        User newUser = getNew();
+        newUser.setEmail("user@yandex.ru");
+        perform(MockMvcRequestBuilders.post(REST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(userHttpBasic(ADMIN))
+                .content(UserTestData.jsonWithPassword(newUser, "newPass")))
+                .andExpect(status().isConflict())
+                .andExpect(content().string("{\"url\":\"http://localhost/rest/admin/users/\",\"type\":\"DATA_ERROR\",\"detail\":\"User with this email already exists!\"}"));
+
+        USER_MATCHER.assertMatch(userService.getAll(), ADMIN, USER);
     }
 
     @Test

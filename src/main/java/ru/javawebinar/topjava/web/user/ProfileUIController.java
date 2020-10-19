@@ -3,11 +3,14 @@ package ru.javawebinar.topjava.web.user;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.SessionStatus;
+import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.to.UserTo;
+import ru.javawebinar.topjava.util.exception.NotFoundException;
 import ru.javawebinar.topjava.web.SecurityUtil;
 
 import javax.validation.Valid;
@@ -23,6 +26,16 @@ public class ProfileUIController extends AbstractUserController {
 
     @PostMapping
     public String updateProfile(@Valid UserTo userTo, BindingResult result, SessionStatus status) {
+        if (userTo.getEmail() != null) {
+            try {
+                User user = super.getByMail(userTo.getEmail());
+                if (user!=null && user.id() != SecurityUtil.authUserId()) {
+                    result.addError(new FieldError("userTo", "email", "User with this email already exist!"));
+                }
+            } catch (NotFoundException ignored) {
+
+            }
+        }
         if (result.hasErrors()) {
             return "profile";
         } else {
@@ -42,6 +55,16 @@ public class ProfileUIController extends AbstractUserController {
 
     @PostMapping("/register")
     public String saveRegister(@Valid UserTo userTo, BindingResult result, SessionStatus status, ModelMap model) {
+        if (userTo.getEmail() != null) {
+            try {
+                if (super.getByMail(userTo.getEmail()) != null) {
+                    result.addError(new FieldError("userTo", "email", "User with this email already exist!"));
+                }
+            } catch (NotFoundException ignored) {
+
+            }
+        }
+
         if (result.hasErrors()) {
             model.addAttribute("register", true);
             return "profile";

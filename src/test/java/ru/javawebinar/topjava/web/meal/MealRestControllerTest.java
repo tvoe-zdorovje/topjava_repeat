@@ -83,6 +83,20 @@ class MealRestControllerTest extends AbstractControllerTest {
     }
 
     @Test
+    void updateWithDuplicateDateTime() throws Exception {
+        Meal updated = MealTestData.getUpdated();
+        updated.setDateTime(MEAL2.getDateTime());
+        perform(MockMvcRequestBuilders.put(REST_URL + MEAL1_ID).contentType(MediaType.APPLICATION_JSON)
+                .content(JsonUtil.writeValue(updated))
+                .with(userHttpBasic(USER)))
+                .andDo(print())
+                .andExpect(status().isConflict())
+                .andExpect(content().string("{\"url\":\"http://localhost/rest/profile/meals/100002\",\"type\":\"DATA_ERROR\",\"detail\":\"Meal with this date and time already exists!\"}"));
+
+        MEAL_MATCHER.assertMatch(mealService.get(MEAL1_ID, USER_ID), MEAL1);
+    }
+
+    @Test
     void updateInvalid() throws Exception {
         Meal updated = MealTestData.getUpdated();
         updated.setCalories(null);
