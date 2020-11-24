@@ -1,5 +1,10 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/89967c47e55a4456b5428f4240ca1940)](https://www.codacy.com/manual/tvoe-zdorovje/topjava_repeat/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=tvoe-zdorovje/topjava_repeat&amp;utm_campaign=Badge_Grade)
 [![Build Status](https://travis-ci.org/tvoe-zdorovje/topjava_repeat.svg?branch=master)](https://travis-ci.org/tvoe-zdorovje/topjava_repeat)
+[![Better Uptime Badge](https://betteruptime.com/status-badges/v1/monitor/5abj.svg)](https://betteruptime.com/?utm_source=status_badge)
+
+Ветки master и doc целиком и полностью принадлежат команде JavaOPs. Решения заданий из ветки doc находятся в ветках HW##.<br>
+[Демонстрация проекта](http://internship-topjava.herokuapp.com)<br>
+[Выпускной проект](https://github.com/tvoe-zdorovje/topjava-graduation)
 
 Java Enterprise Online Project 
 ===============================
